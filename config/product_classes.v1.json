@@ -1,0 +1,43 @@
+{
+  "contract_version": "1.0.0",
+  "mission": "ROMAN",
+  "domain": "ASTRONOMICAL_OBSERVATORY",
+  "origin_classes": [
+    "OFFICIAL_INFO",
+    "SIMULATED",
+    "GROUND_TEST",
+    "FLIGHT_ENGINEERING_PUBLIC",
+    "FLIGHT_SCIENCE",
+    "COMMUNITY_DERIVED",
+    "ROMAN_SYSTEM_DERIVED",
+    "UNKNOWN_QUARANTINE"
+  ],
+  "data_level_labels": [
+    "NOT_APPLICABLE",
+    "WFI_LEVEL_0_RESTRICTED",
+    "WFI_LEVEL_1",
+    "WFI_LEVEL_2",
+    "WFI_LEVEL_3",
+    "WFI_LEVEL_4",
+    "WFI_LEVEL_5",
+    "CGI_LEVEL_0_RESTRICTED",
+    "CGI_LEVEL_1",
+    "CGI_LEVEL_2A",
+    "CGI_LEVEL_2B",
+    "CGI_HIGHER_LEVEL"
+  ],
+  "unknown_default": "UNKNOWN_QUARANTINE",
+  "flight_class_requires_explicit_provenance": true,
+  "bare_l1_label_allowed": false,
+  "hard_distinctions": [
+    "SIMULATED_IS_NOT_FLIGHT",
+    "GROUND_TEST_IS_NOT_FLIGHT",
+    "TRIPLET_TEST_IS_NOT_FLIGHT",
+    "WORKSHOP_BUILD22_IS_NOT_FLIGHT",
+    "PUBLIC_ARCHIVE_METADATA_IS_NOT_A_SCIENCE_CLAIM",
+    "PAGE_CHANGE_IS_NOT_DEPLOYMENT_CONFIRMATION",
+    "PLANNED_TRAJECTORY_IS_NOT_MEASURED_EPHEMERIS",
+    "SUN_EARTH_L1_SPACE_WEATHER_IS_NOT_WFI_LEVEL_1",
+    "SUN_EARTH_L1_SPACE_WEATHER_IS_NOT_CGI_LEVEL_1"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "contract_version": "1.0.0",
+  "mission": "ROMAN",
+  "domain": "ASTRONOMICAL_OBSERVATORY",
+  "invoke_url": "https://mast.stsci.edu/api/v0/invoke",
+  "candidate_obs_collections": [
+    "Roman",
+    "ROMAN"
+  ],
+  "sample_observation_row_limit": 25,
+  "sample_product_observation_limit": 3,
+  "sample_product_row_limit": 100,
+  "timeout_seconds": 45,
+  "max_poll_seconds": 60,
+  "metadata_only": true,
+  "download_products": false,
+  "flight_data_assumed": false
+}

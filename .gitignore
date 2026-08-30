@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Runtime evidence and local vaults
+runs/
+data/
+vault/
+quarantine/
+exports/private/
+*.partial
+*.tmp
+
+# Large Roman / astronomy containers and archives
+*.fits
+*.fit
+*.fts
+*.asdf
+*.h5
+*.hdf5
+*.zarr
+*.npy
+*.npz
+*.parquet
+*.feather
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.gz
+*.bz2
+
+# Local configuration and credentials
+.env
+.env.*
+!*.example
+config/local*.json
+config/secrets*.json

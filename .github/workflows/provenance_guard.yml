@@ -1,0 +1,42 @@
+name: Roman Provenance Guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package and tests
+        run: python -m pip install -e ".[dev]"
+      - name: Enforce contracts and firewall tests
+        run: |
+          roman-watch validate
+          python -m pytest tests/test_firewall.py tests/test_workshop_manifest.py tests/test_classifier.py
+      - name: Reject committed bulk astronomy containers
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          blocked = ('.fits', '.fit', '.fts', '.asdf', '.parquet', '.h5', '.hdf5', '.zarr', '.tar', '.tar.gz', '.tgz', '.zip', '.7z')
+          tracked = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+          bad = [path for path in tracked if path.lower().endswith(blocked)]
+          if bad:
+              raise SystemExit('Blocked bulk containers are tracked: ' + ', '.join(bad))
+          print('No blocked bulk containers are tracked.')
+          PY

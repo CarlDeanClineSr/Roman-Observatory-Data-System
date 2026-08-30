@@ -1,0 +1,21 @@
+{
+  "vault_contract_version": "1.0.0",
+  "root_environment_variable": "ROMAN_VAULT_ROOT",
+  "suggested_windows_root": "D:/ROMAN_DATA_VAULT",
+  "required_subdirectories": [
+    "raw/public_mission_pages",
+    "raw/mast_metadata",
+    "raw/ground_test",
+    "raw/simulations",
+    "raw/flight_science",
+    "quarantine",
+    "normalized",
+    "derived",
+    "catalogs",
+    "manifests",
+    "checksums",
+    "logs",
+    "exports/nvcpp"
+  ],
+  "git_storage_allowed": false
+}

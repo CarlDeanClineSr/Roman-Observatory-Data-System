@@ -1,0 +1,51 @@
+{
+  "created_utc": "2026-08-30T14:20:00Z",
+  "domain": "ASTRONOMICAL_OBSERVATORY",
+  "file_count": 7,
+  "files": [
+    {
+      "path": "config/sources.v1.json",
+      "sha256": "5d26a9d14f41f8eb9177783378b526efe09fafac009f41b77470b90d7a78dd65",
+      "size_bytes": 14292
+    },
+    {
+      "path": "config/download_policy.v1.json",
+      "sha256": "09d70bb2a71a1378835028254891e885ec30fe469cb6e1b8320f2199f8aa562e",
+      "size_bytes": 1513
+    },
+    {
+      "path": "config/product_classes.v1.json",
+      "sha256": "93bd29041458ba719209177d866ad240af977990fae967a7c9b0750ba11b955e",
+      "size_bytes": 1159
+    },
+    {
+      "path": "config/mast_metadata.v1.json",
+      "sha256": "8723ddd3eb77f3c8f42b60a83562e9a468f9bc52eac23033df25183447327d17",
+      "size_bytes": 467
+    },
+    {
+      "path": "config/workshop_build22_manifest.v1.json",
+      "sha256": "d346bf369bca1de2e6882a5c9b0fafe81e079900e29047383df1f79dab8d7147",
+      "size_bytes": 4200
+    },
+    {
+      "path": "config/nvcpp_export_contract.v1.json",
+      "sha256": "c5e825d3d2f7b15244368eff6231277287e9fd89431fa345e2ee794a25e80083",
+      "size_bytes": 733
+    },
+    {
+      "path": "config/vault.example.json",
+      "sha256": "f5f4976d867826dd7a26e0588b71ac7b1a1a183e4b6a2bac65f6bc6bac4a74fb",
+      "size_bytes": 472
+    }
+  ],
+  "hash_algorithm": "SHA-256",
+  "interpretation_limits": [
+    "This manifest freezes v0.1 control contracts; it does not hash remote data products.",
+    "Changing a frozen contract requires updating this manifest in the same reviewed change.",
+    "The manifest does not authorize any product download."
+  ],
+  "manifest_version": "1.0.0",
+  "mission": "ROMAN",
+  "status": "BOOTSTRAP_CONTRACTS_FROZEN_V1"
+}

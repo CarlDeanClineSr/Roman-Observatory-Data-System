@@ -1,0 +1,26 @@
+{
+  "export_contract_version": "1.0.0",
+  "source_system": "ROMAN_OBSERVATORY_DATA_SYSTEM",
+  "destination_system": "NVCPP",
+  "destination_domain": "ASTRONOMICAL_OBSERVATORY",
+  "allowed_export_kinds": [
+    "PUBLIC_MISSION_STATUS",
+    "PUBLIC_PRODUCT_INVENTORY",
+    "SELECTED_PRODUCT_MANIFEST",
+    "SOURCE_HASH_INVENTORY",
+    "ROMAN_ANALYSIS_CAPSULE"
+  ],
+  "raw_telescope_arrays_allowed": false,
+  "bulk_products_allowed": false,
+  "sun_earth_l1_space_weather_allowed": false,
+  "plasma_pipeline_allowed": false,
+  "chi_B24M_allowed": false,
+  "gannon_holdout_allowed": false,
+  "required_fields": [
+    "export_contract_version",
+    "created_utc",
+    "source_manifest_sha256",
+    "destination_domain",
+    "records"
+  ]
+}
