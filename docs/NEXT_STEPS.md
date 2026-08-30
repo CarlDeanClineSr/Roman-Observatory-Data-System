@@ -18,15 +18,18 @@ automatic_product_downloads_enabled = false
 all source IDs match config/sources.v1.json
 raw hashes exist for successful captures
 Nexus authenticated Hub remained disabled
+JPL HTTP 403 is RESTRICTED / CDN_RESTRICTED
+failed_source_count counts only unavailable captures, not the expected JPL boundary
 ```
 
-Then run **Roman MAST Metadata Watch** once and confirm:
+After the source-watch review, the only allowed MAST increment is the narrowed **Roman MAST Metadata Watch**. Before dispatch, confirm its contract states:
 
 ```text
-metadata_only = true
+query_scope = MISSION_LIST_AND_COLLECTION_COUNTS_ONLY
+observation_rows_enabled = false
+product_rows_enabled = false
 products_downloaded = 0
 flight_data_assumed = false
-ambiguous rows remain UNKNOWN_QUARANTINE
 ```
 
-Only after those reviews should the first small NVCPP astronomical export be created.
+When that artifact is eventually reviewed, stop again. Observation rows, product lists, file downloads, and an NVCPP export remain separately review-gated.

@@ -96,6 +96,7 @@ def _login_wall_suspected(summary: dict[str, Any]) -> bool:
 
 
 def _classify_response(
+    source: SourceRecord,
     summary: dict[str, Any],
     *,
     policy: dict[str, Any],
@@ -106,6 +107,8 @@ def _classify_response(
     final_url = str(summary["final_url"])
     if not final_url.startswith("https://") or not host_allowed(final_url, policy):
         return "RESTRICTED", "REDIRECTED_OUTSIDE_ALLOWLIST"
+    if source.access == "CDN_RESTRICTED" and status in {401, 403}:
+        return "RESTRICTED", "CDN_RESTRICTED"
     if status in {401, 403}:
         return "RESTRICTED", f"HTTP_{status}"
     if _login_wall_suspected(summary):
@@ -195,8 +198,14 @@ def run_source_watch(
     restricted = 0
     unavailable = 0
     captured_responses = 0
+    expectation_mismatches = 0
+    expected_restricted = sum(
+        source.raw.get("expected_watch_status") == "RESTRICTED" for source in sources
+    )
 
     for source in sources:
+        expected_status = str(source.raw.get("expected_watch_status", "SUCCESS"))
+        expected_availability = source.raw.get("expected_availability_state")
         record: dict[str, Any] = {
             "source_id": source.source_id,
             "name": source.name,
@@ -205,6 +214,8 @@ def run_source_watch(
             "source_class": source.source_class,
             "access": source.access,
             "poll_mode": source.poll_mode,
+            "expected_status": expected_status,
+            "expected_availability_state": expected_availability,
             "requested_url": source.url,
             "final_url": None,
             "http_status": None,
@@ -230,14 +241,22 @@ def run_source_watch(
                 change_state = "CHANGED"
 
             source_status, availability_state = _classify_response(
+                source,
                 summary,
                 policy=policy,
             )
+            expectation_met = source_status == expected_status and (
+                expected_availability is None
+                or availability_state == expected_availability
+            )
+            if not expectation_met:
+                expectation_mismatches += 1
             record.update(summary)
             record.update(
                 {
                     "status": source_status,
                     "availability_state": availability_state,
+                    "expectation_met": expectation_met,
                     "change_state": change_state,
                     "previous_raw_sha256": previous,
                     "raw_path": str(raw_path.relative_to(outdir)),
@@ -251,10 +270,14 @@ def run_source_watch(
                 unavailable += 1
         except SourceWatchError as exc:
             unavailable += 1
+            expectation_met = expected_status == "UNAVAILABLE"
+            if not expectation_met:
+                expectation_mismatches += 1
             record.update(
                 {
                     "status": "UNAVAILABLE",
                     "availability_state": "NO_CAPTURE",
+                    "expectation_met": expectation_met,
                     "error": str(exc),
                     "change_state": "UNKNOWN",
                     "retrieved_utc": datetime.now(timezone.utc).isoformat(),
@@ -268,18 +291,25 @@ def run_source_watch(
         status = "PARTIAL"
     else:
         status = "FAILED"
+    expected_run_status = "PARTIAL" if expected_restricted else "SUCCESS"
     manifest = {
-        "manifest_version": "1.0.0",
+        "manifest_version": "1.1.0",
         "status": status,
+        "expected_run_status": expected_run_status,
+        "run_status_matches_expectation": (
+            status == expected_run_status and expectation_mismatches == 0
+        ),
         "mission": "ROMAN",
         "domain": "ASTRONOMICAL_OBSERVATORY",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "source_count": len(results),
         "successful_source_count": successes,
         "restricted_source_count": restricted,
+        "expected_restricted_source_count": expected_restricted,
         "unavailable_source_count": unavailable,
         "captured_response_count": captured_responses,
-        "failed_source_count": restricted + unavailable,
+        "expectation_mismatch_count": expectation_mismatches,
+        "failed_source_count": unavailable,
         "automatic_product_downloads_enabled": False,
         "products_downloaded": 0,
         "source_registry_path": str(sources_path),

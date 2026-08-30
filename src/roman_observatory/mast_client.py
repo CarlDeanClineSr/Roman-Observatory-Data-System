@@ -1,4 +1,4 @@
-"""Small evidence-preserving client for bounded MAST metadata queries."""
+"""Small evidence-preserving client for narrowly bounded MAST metadata queries."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import hashlib
 import json
 import re
 import time
-from typing import Any, Iterable
+from typing import Any
 from urllib.parse import quote
 
 import requests
@@ -50,6 +50,8 @@ class MastInvocation:
 
 
 class MastClient:
+    """MAST client exposing only mission-list and collection-count queries in v0.1."""
+
     def __init__(
         self,
         *,
@@ -126,13 +128,19 @@ class MastClient:
                 raise MastError("MAST long-poll timeout")
             time.sleep(self.poll_interval_seconds)
 
-    def list_missions(self) -> tuple[list[str], MastInvocation]:
+    def list_missions(self, *, max_rows: int) -> tuple[list[str], MastInvocation]:
+        if max_rows < 1 or max_rows > 500:
+            raise ValueError("mission-list row cap must be between 1 and 500")
         response = self.invoke(
             {"service": "Mast.Missions.List", "params": {}, "format": "json"}
         )
         data = response.payload.get("data", [])
         if not isinstance(data, list):
             raise MastError("Mast.Missions.List data is not a list")
+        if len(data) > max_rows:
+            raise MastError(
+                f"Mast.Missions.List returned {len(data)} rows, exceeding hard cap {max_rows}"
+            )
         missions = {
             row.get("distinctValue", "").strip()
             for row in data
@@ -140,9 +148,16 @@ class MastClient:
         }
         return sorted(item for item in missions if item), response
 
-    def count_collection(self, collection: str) -> tuple[int, MastInvocation]:
+    def count_collection(
+        self,
+        collection: str,
+        *,
+        max_rows: int = 1,
+    ) -> tuple[int, MastInvocation]:
         if not collection.strip():
             raise ValueError("collection must not be empty")
+        if max_rows != 1:
+            raise ValueError("collection-count row cap must be exactly 1")
         response = self.invoke(
             {
                 "service": "Mast.Caom.Filtered",
@@ -154,43 +169,12 @@ class MastClient:
                 },
             }
         )
+        data = response.payload.get("data")
+        if isinstance(data, list) and len(data) > max_rows:
+            raise MastError(
+                f"collection-count query returned {len(data)} rows, exceeding hard cap {max_rows}"
+            )
         return extract_count(response.payload), response
-
-    def sample_collection(self, collection: str, *, pagesize: int) -> MastInvocation:
-        if pagesize < 1 or pagesize > 500:
-            raise ValueError("pagesize must be between 1 and 500")
-        return self.invoke(
-            {
-                "service": "Mast.Caom.Filtered",
-                "format": "json",
-                "pagesize": pagesize,
-                "page": 1,
-                "removenullcolumns": True,
-                "params": {
-                    "columns": "*",
-                    "filters": [{"paramName": "obs_collection", "values": [collection]}],
-                    "obstype": "all",
-                },
-            }
-        )
-
-    def list_products(self, obsids: Iterable[str | int], *, pagesize: int) -> MastInvocation:
-        """Fetch bounded product metadata using the documented Mast.Caom.Products service."""
-
-        values = [str(value).strip() for value in obsids if str(value).strip()]
-        if not values:
-            raise ValueError("at least one obsid is required")
-        if pagesize < 1 or pagesize > 500:
-            raise ValueError("pagesize must be between 1 and 500")
-        return self.invoke(
-            {
-                "service": "Mast.Caom.Products",
-                "format": "json",
-                "pagesize": pagesize,
-                "page": 1,
-                "params": {"obsid": ",".join(values)},
-            }
-        )
 
 
 def extract_count(payload: dict[str, Any]) -> int:

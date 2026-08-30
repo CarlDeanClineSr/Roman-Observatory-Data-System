@@ -146,16 +146,46 @@ def validate_mast(value: dict[str, Any]) -> dict[str, Any]:
         raise ContractError("MAST metadata contract must be metadata-only")
     if value.get("flight_data_assumed") is not False:
         raise ContractError("MAST metadata contract must not assume flight data")
+    if value.get("query_scope") != "MISSION_LIST_AND_COLLECTION_COUNTS_ONLY":
+        raise ContractError("MAST metadata contract must be mission-list/count-only")
+    if value.get("observation_rows_enabled") is not False:
+        raise ContractError("MAST observation rows must remain disabled")
+    if value.get("product_rows_enabled") is not False:
+        raise ContractError("MAST product rows must remain disabled")
     url = value.get("invoke_url")
     if not isinstance(url, str) or url != "https://mast.stsci.edu/api/v0/invoke":
         raise ContractError("MAST metadata contract has unexpected invoke_url")
     candidates = value.get("candidate_obs_collections")
     if not isinstance(candidates, list) or not candidates:
         raise ContractError("MAST metadata contract needs collection candidates")
+    if not all(isinstance(item, str) and item.strip() for item in candidates):
+        raise ContractError("MAST collection candidates must be nonempty strings")
+    mission_cap = value.get("mission_list_row_cap")
+    if not isinstance(mission_cap, int) or mission_cap < 1 or mission_cap > 500:
+        raise ContractError("MAST mission-list row cap must be between 1 and 500")
+    collection_cap = value.get("collection_query_cap")
+    if not isinstance(collection_cap, int) or collection_cap < 1 or collection_cap > 16:
+        raise ContractError("MAST collection-query cap must be between 1 and 16")
+    if len(candidates) > collection_cap:
+        raise ContractError("MAST candidate collections exceed collection-query cap")
+    if value.get("count_response_row_cap") != 1:
+        raise ContractError("MAST count-response row cap must be exactly 1")
+    forbidden_legacy_fields = {
+        "sample_observation_row_limit",
+        "sample_product_observation_limit",
+        "sample_product_row_limit",
+    }
+    present = sorted(forbidden_legacy_fields.intersection(value))
+    if present:
+        raise ContractError(f"MAST legacy observation/product fields remain present: {present}")
     return {
+        "query_scope": "MISSION_LIST_AND_COLLECTION_COUNTS_ONLY",
         "candidate_collection_count": len(candidates),
-        "sample_observation_row_limit": value.get("sample_observation_row_limit"),
-        "sample_product_row_limit": value.get("sample_product_row_limit"),
+        "mission_list_row_cap": mission_cap,
+        "collection_query_cap": collection_cap,
+        "count_response_row_cap": 1,
+        "observation_rows_enabled": False,
+        "product_rows_enabled": False,
     }
 
 
@@ -203,7 +233,6 @@ def validate_export_contract(value: dict[str, Any]) -> dict[str, Any]:
         if value.get(key) is not False:
             raise ContractError(f"export contract: {key} must be false")
     return {"allowed_export_kind_count": len(value.get("allowed_export_kinds", []))}
-
 
 
 def validate_bootstrap_freeze(value: dict[str, Any], *, project_root: Path) -> dict[str, Any]:
