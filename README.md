@@ -26,7 +26,7 @@ This repository is independent from LUFT and from NVCPP's Sun-Earth L1 space-wea
 
 1. Freezes an approved Roman source registry built from NASA, STScI, MAST, IPAC, the Roman Research Nexus documentation, Roman CPP resources, `roman-corgi`, the Roman technical-information repository, and the official Roman Data Workshop.
 2. Captures bounded public web responses and records retrieval time, HTTP status, selected headers, exact bytes, SHA-256, and change state.
-3. Queries MAST through the documented `invoke` API for **metadata only**: mission registration, Roman collection counts, bounded observation rows, and bounded product rows.
+3. Queries MAST through the documented `invoke` API for **metadata only**: the mission list and one explicitly named Roman collection count. Observation rows, product rows, and file retrieval are disabled.
 4. Classifies records conservatively as `OFFICIAL_INFO`, `SIMULATED`, `GROUND_TEST`, an explicit `FLIGHT_*` class, or `UNKNOWN_QUARANTINE`.
 5. Produces one small `nvcpp_approved_export.json` whose firewall fields remain closed to L1, plasma, `chi_B24M`, and the Gannon holdout.
 6. Runs offline CI tests that prohibit cross-imports from NVCPP space-weather modules and prevent simulation or triplet-test records from being promoted to flight data.
@@ -102,7 +102,7 @@ Provider-facing commands remain manual:
 # Bounded public page evidence only
 roman-watch source-watch --outdir runs/roman/source_watch
 
-# Bounded MAST metadata only; no products downloaded
+# Mission list + Roman collection counts only; no observation/product rows
 roman-watch mast-catalog --outdir runs/roman/mast_catalog
 
 # Build a small firewall-safe export from a completed manifest
@@ -118,7 +118,7 @@ roman-watch export \
 | `config/sources.v1.json` | Frozen Roman source registry |
 | `config/download_policy.v1.json` | Metadata-first retrieval and size limits |
 | `config/product_classes.v1.json` | Origin classes and namespaced data levels |
-| `config/mast_metadata.v1.json` | Bounded MAST metadata query contract |
+| `config/mast_metadata.v1.json` | Mission-list and collection-count-only MAST contract |
 | `config/workshop_build22_manifest.v1.json` | Frozen official workshop file list, downloads disabled |
 | `config/nvcpp_export_contract.v1.json` | Narrow Roman-to-NVCPP astronomical export boundary |
 | `config/bootstrap_freeze.v1.json` | SHA-256 freeze of every v0.1 control contract |
@@ -149,8 +149,8 @@ initial commit and offline CI
     -> run one manual source watch
     -> inspect source hashes and change states
     -> run one manual MAST metadata watch
-    -> inspect rows, classifications, sizes, and URIs
-    -> create the first small NVCPP-approved export
+    -> inspect the mission list, collection counts, hard caps, and zero-row/zero-download assertions
+    -> stop for another review before any observation or product metadata is enabled
     -> only then consider one separately approved small data product
 ```
 
