@@ -1,7 +1,9 @@
 {
+  "amendment": "JPL_CDN_RESTRICTION_FROM_FIRST_CAPTURE",
   "automatic_product_downloads": false,
-  "contract_version": "1.0.0",
+  "contract_version": "1.1.0",
   "domain": "ASTRONOMICAL_OBSERVATORY",
+  "first_capture_manifest_sha256": "aff96a5372247a6b0ae645183e1caa3bf8ebddda351d9808f5da216235f5a1dd",
   "frozen_date_utc": "2026-08-30",
   "mission": "ROMAN",
   "sources": [
@@ -71,14 +73,25 @@
       "url": "https://science.nasa.gov/mission/roman-space-telescope/core-community-surveys/"
     },
     {
-      "access": "PUBLIC",
+      "access": "CDN_RESTRICTED",
       "authority": "MISSION_PARTNER_OFFICIAL",
       "automatic_product_download": false,
       "capture_raw_response": true,
+      "cookie_or_login_bypass_allowed": false,
       "enabled": true,
+      "expected_availability_state": "CDN_RESTRICTED",
+      "expected_watch_status": "RESTRICTED",
       "name": "JPL Roman mission page",
       "organization": "NASA_JPL",
       "poll_mode": "PAGE_HASH",
+      "restriction_basis": {
+        "captured_utc": "2026-08-30T15:18:46.984886+00:00",
+        "http_status": 403,
+        "raw_sha256": "06b826525c3c93f386bed3991ae1ec65c4588dd85f4c61c4d04a121bda791bc8",
+        "raw_size_bytes": 919,
+        "title": "ERROR: The request could not be satisfied"
+      },
+      "restriction_interpretation": "PUBLIC_CDN_BOT_BLOCK_NO_AUTH_BYPASS",
       "source_class": "OFFICIAL_INFO",
       "source_id": "JPL_ROMAN_MISSION",
       "url": "https://www.jpl.nasa.gov/missions/the-nancy-grace-roman-space-telescope"
