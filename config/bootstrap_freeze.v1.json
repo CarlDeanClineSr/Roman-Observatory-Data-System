@@ -1,12 +1,13 @@
 {
-  "created_utc": "2026-08-30T14:20:00Z",
+  "amendment": "JPL_CDN_BOUNDARY_AND_MAST_MISSION_COUNT_ONLY",
+  "created_utc": "2026-08-30T15:35:14Z",
   "domain": "ASTRONOMICAL_OBSERVATORY",
   "file_count": 7,
   "files": [
     {
       "path": "config/sources.v1.json",
-      "sha256": "5d26a9d14f41f8eb9177783378b526efe09fafac009f41b77470b90d7a78dd65",
-      "size_bytes": 14292
+      "sha256": "a47e525c9a6092f6420ba7f20ca7539211647ddb3c2402c4b447e76928db28c0",
+      "size_bytes": 14990
     },
     {
       "path": "config/download_policy.v1.json",
@@ -20,8 +21,8 @@
     },
     {
       "path": "config/mast_metadata.v1.json",
-      "sha256": "8723ddd3eb77f3c8f42b60a83562e9a468f9bc52eac23033df25183447327d17",
-      "size_bytes": 467
+      "sha256": "7924652d3889ff71e5c5664e761042d93033974fd6603e57d3c9b8ac6fd7e304",
+      "size_bytes": 561
     },
     {
       "path": "config/workshop_build22_manifest.v1.json",
@@ -42,10 +43,11 @@
   "hash_algorithm": "SHA-256",
   "interpretation_limits": [
     "This manifest freezes v0.1 control contracts; it does not hash remote data products.",
+    "Amendment 1 records the observed JPL CDN restriction and narrows MAST to mission-list and collection-count queries only.",
     "Changing a frozen contract requires updating this manifest in the same reviewed change.",
-    "The manifest does not authorize any product download."
+    "The manifest does not authorize observation rows, product rows, or any product download."
   ],
-  "manifest_version": "1.0.0",
+  "manifest_version": "1.1.0",
   "mission": "ROMAN",
   "status": "BOOTSTRAP_CONTRACTS_FROZEN_V1"
 }
