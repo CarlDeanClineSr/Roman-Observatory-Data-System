@@ -20,9 +20,29 @@ class SourceWatchError(RuntimeError):
     """Raised when a configured public source cannot be safely captured."""
 
 
+_LOGIN_URL_HINTS = (
+    "/login",
+    "/signin",
+    "sign-in",
+    "single-sign-on",
+    "/sso",
+)
+
+_LOGIN_TITLE_HINTS = (
+    "sign in",
+    "log in",
+    "login",
+    "authentication required",
+    "access denied",
+)
+
+
 def _write_json(path: Path, value: Any) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(value, indent=2, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
+    )
     return path
 
 
@@ -67,12 +87,42 @@ def _read_bounded(response: requests.Response, max_bytes: int) -> bytes:
     return b"".join(chunks)
 
 
+def _login_wall_suspected(summary: dict[str, Any]) -> bool:
+    final_url = str(summary.get("final_url") or "").casefold()
+    title = str(summary.get("title") or "").casefold()
+    return any(hint in final_url for hint in _LOGIN_URL_HINTS) or any(
+        hint in title for hint in _LOGIN_TITLE_HINTS
+    )
+
+
+def _classify_response(
+    summary: dict[str, Any],
+    *,
+    policy: dict[str, Any],
+) -> tuple[str, str]:
+    """Classify one captured HTTP response without treating denial as success."""
+
+    status = int(summary["http_status"])
+    final_url = str(summary["final_url"])
+    if not final_url.startswith("https://") or not host_allowed(final_url, policy):
+        return "RESTRICTED", "REDIRECTED_OUTSIDE_ALLOWLIST"
+    if status in {401, 403}:
+        return "RESTRICTED", f"HTTP_{status}"
+    if _login_wall_suspected(summary):
+        return "RESTRICTED", "LOGIN_WALL_SUSPECTED"
+    if 200 <= status < 400:
+        return "SUCCESS", "AVAILABLE"
+    return "UNAVAILABLE", f"HTTP_{status}"
+
+
 def fetch_source(
     source: SourceRecord,
     *,
     policy: dict[str, Any],
     session: requests.Session | None = None,
 ) -> tuple[bytes, dict[str, Any]]:
+    """Capture one bounded HTTP response, including public denial responses."""
+
     if not host_allowed(source.url, policy):
         raise SourceWatchError(f"host is not allowed for source {source.source_id}")
     parsed = urlparse(source.url)
@@ -106,8 +156,6 @@ def fetch_source(
         "raw_sha256": hashlib.sha256(raw).hexdigest(),
         "title": _title(raw, content_type),
     }
-    if response.status_code < 200 or response.status_code >= 400:
-        raise SourceWatchError(f"HTTP {response.status_code}")
     return raw, summary
 
 
@@ -144,6 +192,10 @@ def run_source_watch(
     raw_dir.mkdir(exist_ok=True)
     results: list[dict[str, Any]] = []
     successes = 0
+    restricted = 0
+    unavailable = 0
+    captured_responses = 0
+
     for source in sources:
         record: dict[str, Any] = {
             "source_id": source.source_id,
@@ -153,6 +205,11 @@ def run_source_watch(
             "source_class": source.source_class,
             "access": source.access,
             "poll_mode": source.poll_mode,
+            "requested_url": source.url,
+            "final_url": None,
+            "http_status": None,
+            "raw_sha256": None,
+            "raw_size_bytes": None,
             "automatic_product_download": False,
             "products_downloaded": 0,
         }
@@ -161,6 +218,8 @@ def run_source_watch(
             suffix = _extension(str(summary["content_type"]))
             raw_path = raw_dir / f"{_slug(source.source_id)}{suffix}"
             raw_path.write_bytes(raw)
+            captured_responses += 1
+
             current = str(summary["raw_sha256"])
             previous = prior.get(source.source_id)
             if previous is None:
@@ -169,20 +228,33 @@ def run_source_watch(
                 change_state = "UNCHANGED"
             else:
                 change_state = "CHANGED"
+
+            source_status, availability_state = _classify_response(
+                summary,
+                policy=policy,
+            )
             record.update(summary)
             record.update(
                 {
-                    "status": "SUCCESS",
+                    "status": source_status,
+                    "availability_state": availability_state,
                     "change_state": change_state,
                     "previous_raw_sha256": previous,
                     "raw_path": str(raw_path.relative_to(outdir)),
                 }
             )
-            successes += 1
+            if source_status == "SUCCESS":
+                successes += 1
+            elif source_status == "RESTRICTED":
+                restricted += 1
+            else:
+                unavailable += 1
         except SourceWatchError as exc:
+            unavailable += 1
             record.update(
                 {
-                    "status": "FAILED",
+                    "status": "UNAVAILABLE",
+                    "availability_state": "NO_CAPTURE",
                     "error": str(exc),
                     "change_state": "UNKNOWN",
                     "retrieved_utc": datetime.now(timezone.utc).isoformat(),
@@ -192,7 +264,7 @@ def run_source_watch(
 
     if successes == len(results):
         status = "SUCCESS"
-    elif successes:
+    elif captured_responses:
         status = "PARTIAL"
     else:
         status = "FAILED"
@@ -204,7 +276,10 @@ def run_source_watch(
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "source_count": len(results),
         "successful_source_count": successes,
-        "failed_source_count": len(results) - successes,
+        "restricted_source_count": restricted,
+        "unavailable_source_count": unavailable,
+        "captured_response_count": captured_responses,
+        "failed_source_count": restricted + unavailable,
         "automatic_product_downloads_enabled": False,
         "products_downloaded": 0,
         "source_registry_path": str(sources_path),
