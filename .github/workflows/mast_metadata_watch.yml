@@ -22,7 +22,7 @@ jobs:
         run: python -m pip install -e .
       - name: Validate contracts
         run: roman-watch validate
-      - name: Build bounded MAST metadata catalog
+      - name: Build mission-list and collection-count evidence
         run: roman-watch mast-catalog --outdir runs/roman/mast_catalog
       - name: Upload bounded evidence
         if: always()
