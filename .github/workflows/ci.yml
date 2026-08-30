@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   audit:
+    name: Roman System CI / audit
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
