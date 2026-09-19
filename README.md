@@ -141,7 +141,16 @@ Roman MAST Metadata Watch
 
 A NASA, STScI, MAST, IPAC, GitHub, or documentation outage should create an evidence-bearing operational failure, not block unrelated code review.
 
-## Next controlled sequence
+The first count-only MAST watch was reviewed on September 19, 2026: **11,226**
+Roman collection rows were reported, with zero observation/product queries and
+zero product downloads. This is archive metadata, not a flight-data classification.
+See [the recorded review](docs/MAST_METADATA_REVIEW_2026-09-19.md).
+
+The four repository-managed workflows use Node 24 actions and `ubuntu-24.04`.
+The explicit runner label prevents an `ubuntu-latest` OS migration from silently
+changing this environment. Python remains 3.12; provider watches remain manual.
+
+## Controlled sequence and next review
 
 ```text
 initial commit and offline CI
@@ -154,4 +163,7 @@ initial commit and offline CI
     -> only then consider one separately approved small data product
 ```
 
-No software license has been selected yet. Repository reuse terms should be chosen deliberately by the owner in a later change.
+## License
+
+Repository code is licensed under the [BSD 3-Clause License](LICENSE).
+External mission documents and data retain their own provider terms.
