@@ -11,13 +11,13 @@ permissions:
 jobs:
   guard:
     name: Roman Provenance Guard / guard
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip

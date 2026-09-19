@@ -1,14 +1,24 @@
 # Operator Next Steps
 
-## Now
+## Current checkpoint — September 19, 2026
 
-1. Let the two offline GitHub Actions checks finish.
+The first manual MAST metadata watch completed successfully and its artifact has
+been reviewed. See [the count-only review](MAST_METADATA_REVIEW_2026-09-19.md).
+The result is **11,226 collection rows**, not 11,226 verified flight products.
+
+No further provider run or download is required to complete this checkpoint.
+Observation rows, product lists, downloads, and an NVCPP export remain separately
+review-gated. Future manual count-only runs use the same frozen limits.
+
+## Standing boundaries
+
+1. Keep the offline CI and provenance checks green.
 2. Do not run the STScI workshop downloader.
 3. Do not create a Colab download cell.
 4. Do not clone WFI triplet-test archives.
 5. Do not add Roman dependencies to an NVCPP L1 environment.
 
-## After offline checks are green
+## Repeatable bootstrap checklist
 
 Run **Roman Public Source Watch** once from the Actions tab. Review the uploaded manifest and confirm:
 
@@ -32,4 +42,4 @@ products_downloaded = 0
 flight_data_assumed = false
 ```
 
-When that artifact is eventually reviewed, stop again. Observation rows, product lists, file downloads, and an NVCPP export remain separately review-gated.
+After each artifact review, stop again. Observation rows, product lists, file downloads, and an NVCPP export remain separately review-gated.
