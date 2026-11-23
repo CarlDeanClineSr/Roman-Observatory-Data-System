@@ -146,6 +146,8 @@ Roman collection rows were reported, with zero observation/product queries and
 zero product downloads. This is archive metadata, not a flight-data classification.
 See [the recorded review](docs/MAST_METADATA_REVIEW_2026-09-19.md).
 
+The sibling NVCPP readiness watch records separate bounded Roman metadata observations. Its November 23 count queries returned 476,611 rows for `Roman` and 476,636 for `ROMAN`, but both 25-row samples timed out and one raw response body was not preserved because of a filename collision. No product bytes were downloaded. This does not change the count-only, zero-download policy in this repository; see [the companion-project status note](docs/COMPANION_NVCPP_STATUS_2026-11-23.md).
+
 The four repository-managed workflows use Node 24 actions and `ubuntu-24.04`.
 The explicit runner label prevents an `ubuntu-latest` OS migration from silently
 changing this environment. Python remains 3.12; provider watches remain manual.
